@@ -729,9 +729,6 @@
                 <!-- Candles will be added by JavaScript -->
             </div>
 
-            <!--
-            <p class="hint">Hint: The password is the birthday person's name (lowercase)</p>
-            -->
             <p class="time-indicator" id="timeIndicator"></p>
         </div>
     </div>
@@ -814,21 +811,11 @@
             </div>
 
             <div class="scroll-bottom"></div>
-            <!--
-             <div class="seal">B</div>
-        -->
         </div>
     </div>
 
-    <!--
-    <div class="instructions">
-        <p>The ancient scroll has been unveiled for the birthday celebration!</p>
-        <p>Use the controls above to toggle night mode or share this special message.</p>
-    </div>
- -->
-
     <!-- Audio for background music -->
-    <audio id="backgroundMusic" loop autoplay>
+    <audio id="backgroundMusic" loop>
         <!-- Using a free medieval ambiance track -->
         <source src="Rewrite the Stars (Piano Instrumental)_spotdown.org.mp3" type="audio/mpeg">
     </audio>
@@ -844,7 +831,7 @@
                 greetingClass = "morning-greeting";
                 timeOfDay = "morning";
             } else if (hour >= 12 && hour < 17) {
-                greeting = "Good Afternoon ";
+                greeting = "Good Afternoon";
                 greetingClass = "afternoon-greeting";
                 timeOfDay = "afternoon";
             } else if (hour >= 17 && hour < 21) {
@@ -884,6 +871,7 @@
         const passwordCandles = document.getElementById('passwordCandles');
         const backgroundMusic = document.getElementById('backgroundMusic');
         const dayNightBtn = document.getElementById('dayNightBtn');
+        const musicBtn = document.getElementById('musicBtn');
         const shareBtn = document.getElementById('shareBtn');
         const shareModal = document.getElementById('shareModal');
         const closeShare = document.getElementById('closeShare');
@@ -909,7 +897,7 @@
             timeIndicator.textContent = timeString;
 
             // Set page title based on time of day
-            document.title = `${greeting} - Ancient Birthday Scroll`;
+            document.title = `${greeting} - Happy Birthday Princess`;
 
             // If it's night time, automatically switch to night mode
             if (timeOfDay === 'night') {
@@ -922,10 +910,11 @@
         }
 
         // Set the password to your custom password
-        const correctPassword = "IIIVIIIVXIIXIXIXV"; // Changed from "birthday"
+        const correctPassword = "IIIVIIIVXIIXIXIXV";
 
         // State variables
         let isNightMode = false;
+        let isMusicPlaying = false;
         let candlesLit = 0;
         const totalCandles = 5; // 5 birthday candles
 
@@ -976,6 +965,9 @@
 
             // Focus on password input
             passwordInput.focus();
+
+            // Set initial music button state
+            updateMusicButton();
 
             // Update time indicator every minute
             setInterval(() => {
@@ -1053,10 +1045,49 @@
             const playPromise = backgroundMusic.play();
 
             if (playPromise !== undefined) {
-                playPromise.catch(error => {
+                playPromise.then(() => {
+                    isMusicPlaying = true;
+                    updateMusicButton();
+                }).catch(error => {
                     console.log("Auto-play prevented");
-                    // We'll just let it fail silently since there's no toggle
+                    isMusicPlaying = false;
+                    updateMusicButton();
                 });
+            }
+        }
+
+        // Toggle music playback - FIXED VERSION
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                // Currently playing, so pause it
+                backgroundMusic.pause();
+                isMusicPlaying = false;
+                updateMusicButton();
+            } else {
+                // Currently paused, so play it
+                backgroundMusic.play().then(() => {
+                    // Successfully started playing
+                    isMusicPlaying = true;
+                    updateMusicButton();
+                }).catch(error => {
+                    // Failed to play
+                    console.log("Failed to play music:", error);
+                    isMusicPlaying = false;
+                    updateMusicButton();
+                });
+            }
+        }
+
+        // Update music button appearance
+        function updateMusicButton() {
+            if (isMusicPlaying) {
+                musicBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                musicBtn.title = "Mute Music";
+                musicBtn.classList.add('active');
+            } else {
+                musicBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                musicBtn.title = "Play Music";
+                musicBtn.classList.remove('active');
             }
         }
 
@@ -1077,6 +1108,11 @@
             }
         });
 
+        // Music button toggle
+        musicBtn.addEventListener('click', function () {
+            toggleMusic();
+        });
+
         // Share functionality
         shareBtn.addEventListener('click', function () {
             shareModal.classList.add('active');
@@ -1094,7 +1130,7 @@
         });
 
         // Share buttons functionality
-        const pageTitle = "Have a blust Princess";
+        const pageTitle = "Happy Birthday Princess";
         const pageUrl = window.location.href;
         const shareText = "Check out this beautiful birthday wish for my Princess 🎂🎉";
 
@@ -1183,8 +1219,3 @@
 </body>
 
 </html>
-
-
-
-
-
