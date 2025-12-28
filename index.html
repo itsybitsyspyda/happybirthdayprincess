@@ -230,7 +230,7 @@
         }
 
         .password-candle.lit::before {
-            background-color: #d7b899;
+            background-color=#d7b899;
         }
 
         .password-flame {
@@ -941,7 +941,7 @@
         // State variables
         let isNightMode = false;
         let isMusicPlaying = false;
-        let wasMusicPlaying = false; // Track if music was playing before tab switch
+        let wasMusicPlayingBeforeTabSwitch = false;
         let candlesLit = 0;
         const totalCandles = 5; // 5 birthday candles
 
@@ -979,25 +979,27 @@
             return passwordValue === correctPassword;
         }
 
-        // NEW: Function to handle visibility change (tab/browser switch)
+        // SIMPLIFIED: Function to handle visibility change (tab/browser switch)
         function handleVisibilityChange() {
             if (document.hidden) {
-                // Tab/browser is hidden
-                if (isMusicPlaying) {
+                // Tab/browser is hidden - pause music
+                if (!backgroundMusic.paused) {
                     backgroundMusic.pause();
-                    wasMusicPlaying = true;
-                    // Update UI to show music is paused
-                    updateMusicButton();
+                    wasMusicPlayingBeforeTabSwitch = true;
                 }
             } else {
-                // Tab/browser is visible again
-                if (wasMusicPlaying && !isMusicPlaying) {
+                // Tab/browser is visible again - resume music if it was playing
+                if (wasMusicPlayingBeforeTabSwitch && backgroundMusic.paused) {
                     backgroundMusic.play().then(() => {
+                        wasMusicPlayingBeforeTabSwitch = false;
                         isMusicPlaying = true;
-                        wasMusicPlaying = false;
                         updateMusicButton();
                     }).catch(error => {
                         console.log("Failed to resume music:", error);
+                        // If autoplay is blocked, update state anyway
+                        wasMusicPlayingBeforeTabSwitch = false;
+                        isMusicPlaying = false;
+                        updateMusicButton();
                     });
                 }
             }
@@ -1025,7 +1027,7 @@
                 timeIndicator.textContent = updateTimeIndicator();
             }, 60000);
 
-            // NEW: Add visibility change listener
+            // Add visibility change listener
             document.addEventListener("visibilitychange", handleVisibilityChange);
         }
 
@@ -1096,19 +1098,15 @@
             backgroundMusic.volume = 0.4; // Lower volume for background music
 
             // Try to play music
-            const playPromise = backgroundMusic.play();
-
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    isMusicPlaying = true;
-                    wasMusicPlaying = false;
-                    updateMusicButton();
-                }).catch(error => {
-                    console.log("Auto-play prevented");
-                    isMusicPlaying = false;
-                    updateMusicButton();
-                });
-            }
+            backgroundMusic.play().then(() => {
+                isMusicPlaying = true;
+                wasMusicPlayingBeforeTabSwitch = false;
+                updateMusicButton();
+            }).catch(error => {
+                console.log("Auto-play prevented");
+                isMusicPlaying = false;
+                updateMusicButton();
+            });
         }
 
         // Toggle music playback - FIXED VERSION
@@ -1117,14 +1115,14 @@
                 // Currently playing, so pause it
                 backgroundMusic.pause();
                 isMusicPlaying = false;
-                wasMusicPlaying = false;
+                wasMusicPlayingBeforeTabSwitch = false;
                 updateMusicButton();
             } else {
                 // Currently paused, so play it
                 backgroundMusic.play().then(() => {
                     // Successfully started playing
                     isMusicPlaying = true;
-                    wasMusicPlaying = false;
+                    wasMusicPlayingBeforeTabSwitch = false;
                     updateMusicButton();
                 }).catch(error => {
                     // Failed to play
