@@ -753,8 +753,8 @@
     <div class="share-modal" id="shareModal">
         <div class="share-container">
             <button class="close-share" id="closeShare">&times;</button>
-            <h2 class="share-title">Share the Birthday Scroll</h2>
-            <p style="color: #b8946f; margin-bottom: 20px;">Spread the celebration!</p>
+            <h2 class="share-title">Share</h2>
+            <p style="color: #b8946f; margin-bottom: 20px;"></p>
 
             <div class="share-buttons">
                 <div class="share-btn instagram" id="shareInstagram" title="Share on Instagram">
@@ -810,7 +810,7 @@
 
                 <div class="divider"></div>
 
-                <div class="signature">Written in honored esteem,<br>এ​Daveツ </div>
+                <div class="signature">Written in honored and love,<br>এ​Daveツ </div>
             </div>
 
             <div class="scroll-bottom"></div>
@@ -884,7 +884,6 @@
         const passwordCandles = document.getElementById('passwordCandles');
         const backgroundMusic = document.getElementById('backgroundMusic');
         const dayNightBtn = document.getElementById('dayNightBtn');
-        const musicBtn = document.getElementById('musicBtn');
         const shareBtn = document.getElementById('shareBtn');
         const shareModal = document.getElementById('shareModal');
         const closeShare = document.getElementById('closeShare');
@@ -922,12 +921,11 @@
             }
         }
 
-        // Set the password
-        const correctPassword = "IIIVIIIVXIIXIXIXV"; // Change this to the actual name
+        // Set the password to your custom password
+        const correctPassword = "IIIVIIIVXIIXIXIXV"; // Changed from "birthday"
 
         // State variables
         let isNightMode = false;
-        let isMusicPlaying = false;
         let candlesLit = 0;
         const totalCandles = 5; // 5 birthday candles
 
@@ -944,7 +942,7 @@
 
         // Light up candles based on password input
         function updateCandles() {
-            const passwordValue = passwordInput.value.toLowerCase();
+            const passwordValue = passwordInput.value;
             const candles = document.querySelectorAll('.password-candle');
 
             // Calculate how many candles should be lit based on password length
@@ -979,68 +977,11 @@
             // Focus on password input
             passwordInput.focus();
 
-            // Try to start music
-            startBackgroundMusic();
-
             // Update time indicator every minute
             setInterval(() => {
                 timeIndicator.textContent = updateTimeIndicator();
             }, 60000);
         }
-
-        // Background music functionality
-        function startBackgroundMusic() {
-            backgroundMusic.volume = 0.4; // Lower volume for background music
-
-            // Try to play music automatically
-            const playPromise = backgroundMusic.play();
-
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    console.log("Music started playing automatically");
-                    isMusicPlaying = true;
-                    musicBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                    musicBtn.title = "Mute Music";
-                }).catch(error => {
-                    console.log("Auto-play prevented:", error);
-                    isMusicPlaying = false;
-                    musicBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-                    musicBtn.title = "Play Music";
-
-                    // Wait for user interaction to play music
-                    document.addEventListener('click', function startMusicOnInteraction() {
-                        backgroundMusic.play().then(() => {
-                            console.log("Music started after user interaction");
-                            isMusicPlaying = true;
-                            musicBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                            musicBtn.title = "Mute Music";
-                        }).catch(e => {
-                            console.log("Still can't play:", e);
-                        });
-                        // Only try once
-                        document.removeEventListener('click', startMusicOnInteraction);
-                    });
-                });
-            }
-        }
-
-        // Music toggle functionality
-        musicBtn.addEventListener('click', function () {
-            if (isMusicPlaying) {
-                backgroundMusic.pause();
-                musicBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-                musicBtn.title = "Play Music";
-                isMusicPlaying = false;
-            } else {
-                backgroundMusic.play().then(() => {
-                    musicBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                    musicBtn.title = "Mute Music";
-                    isMusicPlaying = true;
-                }).catch(e => {
-                    console.log("Could not play music:", e);
-                });
-            }
-        });
 
         // Listen for password input changes
         passwordInput.addEventListener('input', function () {
@@ -1049,7 +990,7 @@
 
         passwordForm.addEventListener('submit', function (e) {
             e.preventDefault();
-            const enteredPassword = passwordInput.value.toLowerCase().trim();
+            const enteredPassword = passwordInput.value.trim();
 
             if (enteredPassword === correctPassword) {
                 // Light all candles for a moment before proceeding
@@ -1070,16 +1011,8 @@
                     setTimeout(() => {
                         scroll.classList.add('unrolled');
 
-                        // Ensure music is playing
-                        if (!isMusicPlaying) {
-                            backgroundMusic.play().then(() => {
-                                isMusicPlaying = true;
-                                musicBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                                musicBtn.title = "Mute Music";
-                            }).catch(e => {
-                                console.log("Could not play music:", e);
-                            });
-                        }
+                        // Start playing background music
+                        playBackgroundMusic();
                     }, 500);
                 }, 800);
             } else {
@@ -1111,6 +1044,21 @@
                 }, 500);
             }
         });
+
+        // Background music functionality
+        function playBackgroundMusic() {
+            backgroundMusic.volume = 0.4; // Lower volume for background music
+
+            // Try to play music
+            const playPromise = backgroundMusic.play();
+
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Auto-play prevented");
+                    // We'll just let it fail silently since there's no toggle
+                });
+            }
+        }
 
         // Day/Night mode toggle
         dayNightBtn.addEventListener('click', function () {
@@ -1221,12 +1169,12 @@
         // Add CSS for shake animation
         const style = document.createElement('style');
         style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-                20%, 40%, 60%, 80% { transform: translateX(5px); }
-            }
-        `;
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    `;
         document.head.appendChild(style);
 
         // Initialize the page when loaded
@@ -1235,4 +1183,3 @@
 </body>
 
 </html>
-
