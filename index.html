@@ -385,11 +385,24 @@
             line-height: 1;
         }
 
+        /* Simple centered birthday greeting */
+        .centered-birthday-greeting {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #5d4037;
+            margin: 40px 0;
+            font-family: 'Cinzel', serif;
+        }
+
+        body.night-mode .centered-birthday-greeting {
+            color: #d7b899;
+        }
+
         .signature {
             font-family: 'MedievalSharp', cursive;
             font-size: 2rem;
             color: #5d4037;
-            margin-top: 50px;
+            margin-top: 30px;
             text-align: right;
         }
 
@@ -589,6 +602,10 @@
                 padding: 30px 20px;
             }
 
+            .centered-birthday-greeting {
+                font-size: 2rem;
+            }
+
             .signature {
                 font-size: 1.6rem;
                 margin-top: 30px;
@@ -630,6 +647,10 @@
             .birthday-message {
                 font-size: 1rem;
                 line-height: 1.5;
+            }
+
+            .centered-birthday-greeting {
+                font-size: 1.7rem;
             }
 
             .lock-icon {
@@ -688,6 +709,10 @@
             .scroll {
                 padding: 40px 15px;
                 min-height: 400px;
+            }
+
+            .centered-birthday-greeting {
+                font-size: 1.5rem;
             }
 
             .password-candles {
@@ -805,9 +830,10 @@
                     your path be illuminated with happiness, your heart be light, and your days be long and prosperous.
                 </div>
 
-                <div class="divider"></div>
+                <!-- Simple centered Happy Birthday Chelsie -->
+                <div class="centered-birthday-greeting">Happy Birthday Chelsie 𓆩♡𓆪</div>
 
-                <div class="signature">Written in honor,<br>এ​Daveツ </div>
+                <div class="signature">Written in honor,<br>এ​Daveツ</div>
             </div>
 
             <div class="scroll-bottom"></div>
@@ -915,6 +941,7 @@
         // State variables
         let isNightMode = false;
         let isMusicPlaying = false;
+        let wasMusicPlaying = false; // Track if music was playing before tab switch
         let candlesLit = 0;
         const totalCandles = 5; // 5 birthday candles
 
@@ -952,6 +979,30 @@
             return passwordValue === correctPassword;
         }
 
+        // NEW: Function to handle visibility change (tab/browser switch)
+        function handleVisibilityChange() {
+            if (document.hidden) {
+                // Tab/browser is hidden
+                if (isMusicPlaying) {
+                    backgroundMusic.pause();
+                    wasMusicPlaying = true;
+                    // Update UI to show music is paused
+                    updateMusicButton();
+                }
+            } else {
+                // Tab/browser is visible again
+                if (wasMusicPlaying && !isMusicPlaying) {
+                    backgroundMusic.play().then(() => {
+                        isMusicPlaying = true;
+                        wasMusicPlaying = false;
+                        updateMusicButton();
+                    }).catch(error => {
+                        console.log("Failed to resume music:", error);
+                    });
+                }
+            }
+        }
+
         // Initialize page
         function initPage() {
             // Set time-based greeting
@@ -973,6 +1024,9 @@
             setInterval(() => {
                 timeIndicator.textContent = updateTimeIndicator();
             }, 60000);
+
+            // NEW: Add visibility change listener
+            document.addEventListener("visibilitychange", handleVisibilityChange);
         }
 
         // Listen for password input changes
@@ -1047,6 +1101,7 @@
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     isMusicPlaying = true;
+                    wasMusicPlaying = false;
                     updateMusicButton();
                 }).catch(error => {
                     console.log("Auto-play prevented");
@@ -1062,12 +1117,14 @@
                 // Currently playing, so pause it
                 backgroundMusic.pause();
                 isMusicPlaying = false;
+                wasMusicPlaying = false;
                 updateMusicButton();
             } else {
                 // Currently paused, so play it
                 backgroundMusic.play().then(() => {
                     // Successfully started playing
                     isMusicPlaying = true;
+                    wasMusicPlaying = false;
                     updateMusicButton();
                 }).catch(error => {
                     // Failed to play
